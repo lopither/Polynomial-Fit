@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import sympy as sp
+from sklearn.metrics import r2_score
+
+# Get x and y values from the user as comma-separated lists
+x_input = input("Enter x values separated by commas (e.g., '1, 2, 3, 4'): ")
+y_input = input("Enter y values separated by commas (e.g., '2, 3, 5, 7'): ")
+
+# Parse the inputs into lists of floats
+x_values = np.array(list(map(float, x_input.split(','))))
+y_values = np.array(list(map(float, y_input.split(','))))
+
+# Ensure that x and y have the same length
+if len(x_values) != len(y_values):
+    print("Error: The number of x and y values must be the same.")
+else:
+    # Automatically determine the best polynomial degree using R² score
+    max_degree = min(len(x_values) - 1, 10)  # Avoid overfitting
+    best_degree = 1
+    best_r2 = -np.inf  # Initialize with the worst possible R² value
+
+    for degree in range(1, max_degree + 1):
+        coeffs = np.polyfit(x_values, y_values, degree)
+        poly_model = np.poly1d(coeffs)
+        y_pred = poly_model(x_values)
+        r2 = r2_score(y_values, y_pred)
+
+        if r2 > best_r2:
+            best_r2 = r2
+            best_degree = degree
+
+    # Fit the best polynomial model
+    best_coeffs = np.polyfit(x_values, y_values, best_degree)
+    best_poly_model = np.poly1d(best_coeffs)
+
+    # Generate x values for plotting
+    x_line = np.linspace(min(x_values), max(x_values), 100)
+    y_line = best_poly_model(x_line)
+
+    # Convert to symbolic expression for LaTeX output
+    x = sp.Symbol('x')
+    poly_expr = sum(coeff * x**i for i, coeff in enumerate(reversed(best_coeffs)))
+
+    # Print the best polynomial degree and LaTeX equation
+    print(f"Best polynomial degree: {best_degree}")
+    print("Polynomial model equation in LaTeX format:")
+    print(f"$$ {sp.latex(poly_expr)} $$")  # Prints LaTeX-friendly equation
+    print(f"Polynomial coefficients: {best_coeffs}")
+    print(f"R² score: {best_r2:.4f}")
+
+    # Plot the data points and the polynomial regression curve
+    plt.scatter(x_values, y_values, color="blue", label="Data points")
+    plt.plot(x_line, y_line, color="red", label=f"Polynomial fit (degree {best_degree})")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.title("Best Polynomial Regression Fit")
+    plt.legend()
+    plt.show()
