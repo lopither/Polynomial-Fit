@@ -1,4 +1,4 @@
-Polynomial Fit Project
+# Auto Degree Determinig Polynomial Fit Project
 
 This project is a **Polynomial Regression Fitting Tool** that allows you to:
 - Input your own `x` and `y` values.
